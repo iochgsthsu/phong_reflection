@@ -2,7 +2,9 @@ import numpy as np
 from typing import List, Tuple, Optional
 EPSILON = 1e-6
 class Polygon:
-    def __init__(self, vertices: List[np.ndarray], color: Tuple[int, int, int] = (128, 128, 128)):
+    def __init__(self, ka: float, kd: float, ks: float, n: float,
+                 vertices: List[np.ndarray],
+                   color: Tuple[int, int, int] = (128, 128, 128)):
         if len(vertices) < 3:
             raise ValueError("Poligon musi mieć co najmniej 3 wierzchołki.")
         
@@ -12,6 +14,11 @@ class Polygon:
         v0 = self.vertices[0][:3]
         v1 = self.vertices[1][:3]
         v2 = self.vertices[2][:3]
+
+        self.ka = ka
+        self.kd = kd
+        self.ks = ks
+        self.n = n
         
         self.normal = np.cross(v1 - v0, v2 - v0)
         norm_len = np.linalg.norm(self.normal)

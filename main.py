@@ -26,9 +26,20 @@ def main() -> None:
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Phong reflection model")
     clock = pygame.time.Clock()
+    sphere = Object("sphere.txt")
+    sphere.translate(0, 0, 20)
+    #https://people.eecs.ku.edu/~jrmiller/Courses/672/InClass/3DLighting/MaterialProperties.html
+    ka = 0.2125
+    kd = 0.714
+    ks = 0.393548
+    n = 25.6
 
-
-    bsp_root = BSPTreeNode(None)
+    polygons = []
+    sphere_t = sphere.transformed_vertices()
+    for face in sphere.faces:
+        polygon_v = [sphere_t[i] for i in face]
+        polygons.append(Polygon(ka,kd,ks,n,polygon_v))
+    bsp_root = BSPTreeNode(polygons)
 
     screenshots_dir = "./screenshots/"
     if not os.path.exists(screenshots_dir):

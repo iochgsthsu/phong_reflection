@@ -3,15 +3,18 @@ from typing import Tuple, Optional
 from .camera import Camera
 from .bsp import BSPTreeNode
 from .polygon import Polygon
+from .light import Light
 import numpy as np
 LIGHT_BLUE = (173, 216, 230)
 BLACK = (0, 0, 0)
-
+EPSILON = 1e-12
 class Renderer():
     def __init__(self, 
                  screen: pygame.Surface,
                  camera: Camera,
                  bsp_root: BSPTreeNode,
+                 light: Light = Light(),
+                 intensity: float = 1,
                  bg_color: Tuple[int, int, int] = LIGHT_BLUE,
                  draw_wireframe: bool = True,
                  wireframe_color: Tuple[int, int, int] = BLACK,
@@ -25,9 +28,57 @@ class Renderer():
         self.bsp_root = bsp_root
         self.bg_color = bg_color
         
+        self.light = light
+        self.intensity = intensity
+
+        
         self.draw_wireframe = draw_wireframe
         self.wireframe_color = wireframe_color
         self.wireframe_width = wireframe_width
+
+    def phong(self, p: Polygon) -> None:
+        
+        N = p.normal
+        N_norm = np.linalg.norm(N)
+        if N_norm < EPSILON:
+            return p.color
+        N = N / N_norm
+
+        P = np.mean([v[:3] for v in p.vertices], axis=0)
+
+        L = self.light.position - P
+        L_norm = np.linalg.norm(L)
+        if L_norm < EPSILON:
+            return p.color
+        L = L/L_norm
+
+        V = self.camera.position - P
+        V_norm = np.linalg.norm(V)
+        if V_norm < EPSILON:
+            return p.color
+        V = V/V_norm
+
+        ndotl = max(np.dot(N, L), 0.0)
+
+
+        spec = 0.0
+        if ndotl > 0.0:
+            R = 2.0 * ndotl * N - L
+            R_norm = np.linalg.norm(R)
+            if R_norm >= EPSILON:
+                R = R / R_norm
+                rdotv = max(np.dot(R, V), 0.0)
+                spec = rdotv ** p.n
+
+        background = self.intensity * p.ka
+        diffuse = self.light.intensity * p.kd * ndotl
+        directional = self.light.intensity * p.ks * spec
+        I = background + self.light.f_a * (diffuse + directional)
+        I = np.maximum(I, 0.0)
+
+        base = np.array(p.color, dtype=float) / 255.0
+        rgb = np.clip(base * I, 0.0, 1.0) * 255.0
+        return (int(rgb[0]), int(rgb[1]), int(rgb[2]))
 
     def draw_scene(self) -> None:
         self.screen.fill(self.bg_color)
@@ -49,6 +100,7 @@ class Renderer():
                 projected_points.append(p)
             
             if len(projected_points) >= 3:
-                pygame.draw.polygon(self.screen, poly.color, projected_points)
+                color = self.phong(poly)
+                pygame.draw.polygon(self.screen, color, projected_points)
                 if self.draw_wireframe:
                     pygame.draw.polygon(self.screen, self.wireframe_color, projected_points, self.wireframe_width)

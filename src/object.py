@@ -28,6 +28,7 @@ class Object:
                         raise ValueError(f"Błąd w linii {idx+1}: wierzchołek 'v' wymaga 3 współrzędnych (x, y, z).")
                     
                     x, y, z = map(float, elements[1:4])
+                    #print(x,y,z)
                     self.vertices.append(np.array([x, y, z, 1.0], dtype=float))
 
                 elif type == "f":
