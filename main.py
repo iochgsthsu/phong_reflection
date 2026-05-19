@@ -6,6 +6,7 @@ from src.camera import Camera
 from src.renderer import Renderer
 from src.bsp import BSPTreeNode
 from src.polygon import Polygon
+from src.material import Material
 from datetime import datetime
 import random
 
@@ -33,12 +34,14 @@ def main() -> None:
     kd = 0.714
     ks = 0.393548
     n = 25.6
+    color = (40,255,160)
+    material = Material(ka, kd, ks, n, color)
 
     polygons = []
     sphere_t = sphere.transformed_vertices()
     for face in sphere.faces:
         polygon_v = [sphere_t[i] for i in face]
-        polygons.append(Polygon(ka,kd,ks,n,polygon_v))
+        polygons.append(Polygon(polygon_v,material))
     bsp_root = BSPTreeNode(polygons)
 
     screenshots_dir = "./screenshots/"

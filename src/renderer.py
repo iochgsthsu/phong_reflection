@@ -41,7 +41,7 @@ class Renderer():
         N = p.normal
         N_norm = np.linalg.norm(N)
         if N_norm < EPSILON:
-            return p.color
+            return p.material.color
         N = N / N_norm
 
         P = np.mean([v[:3] for v in p.vertices], axis=0)
@@ -49,13 +49,13 @@ class Renderer():
         L = self.light.position - P
         L_norm = np.linalg.norm(L)
         if L_norm < EPSILON:
-            return p.color
+            return p.material.color
         L = L/L_norm
 
         V = self.camera.position - P
         V_norm = np.linalg.norm(V)
         if V_norm < EPSILON:
-            return p.color
+            return p.material.color
         V = V/V_norm
 
         ndotl = max(np.dot(N, L), 0.0)
@@ -68,15 +68,15 @@ class Renderer():
             if R_norm >= EPSILON:
                 R = R / R_norm
                 rdotv = max(np.dot(R, V), 0.0)
-                spec = rdotv ** p.n
+                spec = rdotv ** p.material.n
 
-        background = self.intensity * p.ka
-        diffuse = self.light.intensity * p.kd * ndotl
-        directional = self.light.intensity * p.ks * spec
+        background = self.intensity * p.material.ka
+        diffuse = self.light.intensity * p.material.kd * ndotl
+        directional = self.light.intensity * p.material.ks * spec
         I = background + self.light.f_a * (diffuse + directional)
         I = np.maximum(I, 0.0)
 
-        base = np.array(p.color, dtype=float) / 255.0
+        base = np.array(p.material.color, dtype=float) / 255.0
         rgb = np.clip(base * I, 0.0, 1.0) * 255.0
         return (int(rgb[0]), int(rgb[1]), int(rgb[2]))
 
