@@ -1,6 +1,7 @@
 import numpy as np
 from typing import List, Tuple, Optional
 from .polygon import Polygon
+import random
 EPSILON = 1e-6
 class BSPTreeNode:
     def __init__(self, polygons: List[Polygon]):
@@ -12,14 +13,15 @@ class BSPTreeNode:
         if not polygons:
             return
 
-        self.divider = polygons[0]
+        self.divider = self.choose_divider(polygons)
         self.coplanar_polygons.append(self.divider)
 
         front_polys, back_polys = [], []
 
-        for poly in polygons[1:]:
+        for poly in polygons:
+            if poly is self.divider:
+                continue
             classification = self.classify_polygon(poly)
-            
             if classification == "coplanar":
                 self.coplanar_polygons.append(poly)
             elif classification == "front":
@@ -37,6 +39,33 @@ class BSPTreeNode:
             self.front = BSPTreeNode(front_polys)
         if back_polys:
             self.back = BSPTreeNode(back_polys)
+
+    import random
+
+    def choose_divider(self, polygons, sample_size=12):
+        candidates = polygons if len(polygons) <= sample_size else random.sample(polygons, sample_size)
+        best = candidates[0]
+        best_score = float("inf")
+
+        for cand in candidates:
+            front = back = spanning = 0
+            self.divider = cand
+            for poly in polygons:
+                if poly is cand:
+                    continue
+                classification = self.classify_polygon(poly)
+                if classification == "front":
+                    front += 1
+                elif classification == "back":
+                    back += 1
+                elif classification == "spanning":
+                    spanning += 1
+            score = abs(front - back) + 3 * spanning
+            if score < best_score:
+                best_score = score
+                best = cand
+
+        return best
 
     def classify_polygon(self, polygon: Polygon) -> str:
         num_in_front = 0
