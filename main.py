@@ -11,7 +11,7 @@ from datetime import datetime
 import random
 
 WIDTH, HEIGHT = 800, 600
-
+BG = (0, 0, 0)
 MOVE_SPEED = 10.0
 ROTATION_SPEED = 100.0
 FOCAL_SPEED = 2.0
@@ -29,7 +29,7 @@ def main() -> None:
     clock = pygame.time.Clock()
     sphere = Object("sphere.txt")
     sphere.translate(0, 0, 20)
-    material_filename = "bronze.txt"
+    material_filename = "brass.txt"
 
     material = Material(material_filename)
 
@@ -45,7 +45,7 @@ def main() -> None:
         os.mkdir(screenshots_dir)
 
     cam = Camera()
-    ren = Renderer(screen, cam, bsp_root=bsp_root, draw_wireframe=False)
+    ren = Renderer(screen, cam, bsp_root=bsp_root, bg_color=BG)
     
     running = True
     while running:

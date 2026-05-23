@@ -16,7 +16,7 @@ class Renderer():
                  light: Light = Light(),
                  intensity: float = 1,
                  bg_color: Tuple[int, int, int] = LIGHT_BLUE,
-                 draw_wireframe: bool = True,
+                 draw_wireframe: bool = False,
                  wireframe_color: Tuple[int, int, int] = BLACK,
                  wireframe_width: int = 1
                 ):
