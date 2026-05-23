@@ -29,13 +29,9 @@ def main() -> None:
     clock = pygame.time.Clock()
     sphere = Object("sphere.txt")
     sphere.translate(0, 0, 20)
-    #https://people.eecs.ku.edu/~jrmiller/Courses/672/InClass/3DLighting/MaterialProperties.html
-    ka = 0.2125
-    kd = 0.714
-    ks = 0.393548
-    n = 25.6
-    color = (40,255,160)
-    material = Material(ka, kd, ks, n, color)
+    material_filename = "bronze.txt"
+
+    material = Material(material_filename)
 
     polygons = []
     sphere_t = sphere.transformed_vertices()
