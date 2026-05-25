@@ -73,7 +73,7 @@ class Renderer():
         background = self.intensity * p.material.ka
         diffuse = self.light.intensity * p.material.kd * ndotl
         directional = self.light.intensity * p.material.ks * spec
-        I = background + self.light.f_a * (diffuse + directional)
+        I = background + self.light.f_att(P) * (diffuse + directional)
         I = np.maximum(I, 0.0)
 
         base = np.array(p.material.color, dtype=float) / 255.0
