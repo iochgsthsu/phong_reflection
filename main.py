@@ -7,6 +7,7 @@ from src.renderer import Renderer
 from src.bsp import BSPTreeNode
 from src.polygon import Polygon
 from src.material import Material
+from src.light import Light
 from datetime import datetime
 import random
 
@@ -19,6 +20,10 @@ FOCAL_SPEED = 2.0
 MAX_FOCAL = 5.0
 MIN_FOCAL = 0.05
 
+LIGHT_SPEED = 10.0
+MAX_LIGHT = 50.0
+MIN_LIGHT = 0.1
+
 FRAMERATE = 60.0
 DIV = 1000.0
 
@@ -29,7 +34,9 @@ def main() -> None:
     clock = pygame.time.Clock()
     sphere = Object("sphere.txt")
     sphere.translate(0, 0, 20)
-    material_filename = "brass.txt"
+    materials = ['polished_copper.txt', "bronze.txt", "brass.txt"]
+    materials_idx = 0
+    material_filename = materials[materials_idx]
 
     material = Material(material_filename)
 
@@ -45,7 +52,8 @@ def main() -> None:
         os.mkdir(screenshots_dir)
 
     cam = Camera()
-    ren = Renderer(screen, cam, bsp_root=bsp_root, bg_color=BG)
+    light = Light()
+    ren = Renderer(screen, cam, bsp_root=bsp_root, bg_color=BG, light=light)
     
     running = True
     while running:
@@ -55,6 +63,12 @@ def main() -> None:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_m:
+                    materials_idx = (materials_idx + 1) % len(materials)
+                    material = Material(materials[materials_idx])
+                    for poly in polygons:
+                        poly.material = material
 
         ren.draw_scene()
 
@@ -103,6 +117,13 @@ def main() -> None:
             cam.focal = min(MAX_FOCAL, cam.focal + FOCAL_SPEED * dt)
         if keys[pygame.K_x]:
             cam.focal = max(MIN_FOCAL, cam.focal - FOCAL_SPEED * dt)
+
+        #Intensywność światła
+
+        if keys[pygame.K_KP_PLUS] or (keys[pygame.K_EQUALS] and (keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT])):
+            light.intensity = np.clip(light.intensity + LIGHT_SPEED * dt, MIN_LIGHT, MAX_LIGHT)
+        if keys[pygame.K_KP_MINUS] or keys[pygame.K_MINUS]:
+            light.intensity = np.clip(light.intensity - LIGHT_SPEED * dt, MIN_LIGHT, MAX_LIGHT)
 
         #Reset i wyjście
         if keys[pygame.K_h]:
