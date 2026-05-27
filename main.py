@@ -34,7 +34,7 @@ def main() -> None:
     clock = pygame.time.Clock()
     sphere = Object("sphere.txt")
     sphere.translate(0, 0, 20)
-    materials = ['polished_copper.txt', "bronze.txt", "brass.txt"]
+    materials = ['polished_bronze.txt', 'copper.txt', 'brass.txt', 'gold.txt', 'silver.txt']
     materials_idx = 0
     material_filename = materials[materials_idx]
 
@@ -42,9 +42,12 @@ def main() -> None:
 
     polygons = []
     sphere_t = sphere.transformed_vertices()
+    sphere_n = sphere.transformed_normals()
     for face in sphere.faces:
         polygon_v = [sphere_t[i] for i in face]
-        polygons.append(Polygon(polygon_v,material))
+        poly = Polygon(polygon_v, material)
+        poly.vertex_normals = [sphere_n[i] for i in face]
+        polygons.append(poly)
     bsp_root = BSPTreeNode(polygons)
 
     screenshots_dir = "./screenshots/"
@@ -53,6 +56,8 @@ def main() -> None:
 
     cam = Camera()
     light = Light()
+    light.position = np.array([-5,15,-5], dtype=float)
+
     ren = Renderer(screen, cam, bsp_root=bsp_root, bg_color=BG, light=light)
     
     running = True
@@ -130,6 +135,7 @@ def main() -> None:
             cam.position = np.array([0.0, 0.0, 0.0], dtype=float)
             cam.orientation = np.eye(3, dtype=float)
             cam.focal = 0.5
+            light.intensity = np.array([30.0, 30.0, 30.0], dtype=float)
         
         if keys[pygame.K_ESCAPE]:
             running = False

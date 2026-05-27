@@ -2,7 +2,7 @@ import numpy as np
 class Light():
     def __init__(self,
                 position: np.ndarray =  np.array([0.0, 0.0, 0.0], dtype=float),
-                intensity: np.ndarray = np.array([20.0, 20.0, 20.0], dtype=float),):
+                intensity: np.ndarray = np.array([30.0, 30.0, 30.0], dtype=float),):
         self.position = position
         self.intensity = intensity
 

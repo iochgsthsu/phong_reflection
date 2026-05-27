@@ -43,6 +43,36 @@ class Object:
         self.rotation = np.array([0.0, 0.0, 0.0], dtype=float) 
         self.scale = np.array([1.0, 1.0, 1.0], dtype=float)
 
+        vn = [np.zeros(3, dtype=float) for _ in self.vertices]
+        for face in self.faces:
+            a, b, c= face
+            v0 = self.vertices[a][:3]
+            v1 = self.vertices[b][:3]
+            v2 = self.vertices[c][:3]
+            fn = np.cross(v1 - v0, v2 - v0)
+            ln = np.linalg.norm(fn)
+            if ln > 1e-12:
+                fn = fn / ln
+                vn[a] += fn
+                vn[b] += fn
+                vn[c] += fn
+        for i in range(len(vn)):
+            l = np.linalg.norm(vn[i])
+            vn[i] = vn[i] / l if l > 1e-12 else np.array([0.0, 0.0, 1.0], dtype=float)
+        self.vertex_normals = vn
+
+    def transformed_normals(self) -> list[np.ndarray]:
+        M = self.model_matrix()
+        Nmat = np.linalg.inv(M).T
+        out = []
+        for n in self.vertex_normals:
+            v4 = np.array([n[0], n[1], n[2], 0.0], dtype=float)
+            t = Nmat @ v4
+            vec = t[:3]
+            ln = np.linalg.norm(vec)
+            out.append(vec / ln if ln > 1e-12 else np.array([0.0,0.0,1.0], dtype=float))
+        return out
+
     def translate(self, dx: float = 0.0, dy: float = 0.0, dz: float = 0.0) -> None:
         self.position += np.array([dx, dy, dz], dtype=float)
 
